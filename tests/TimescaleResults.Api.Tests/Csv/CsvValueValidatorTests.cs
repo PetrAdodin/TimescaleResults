@@ -172,6 +172,25 @@ public sealed class CsvValueValidatorTests
         Assert.Contains("Value", exception.Message);
     }
 
+    [Fact]
+    public void Validate_CommaAsDecimalSeparator_ThrowsValidationException()
+    {
+        var rows = new[]
+        {
+        new CsvRawRow(
+            2,
+            "2026-08-10T12:00:00Z",
+            "1,5",
+            "10")
+    };
+
+        var exception = Assert.Throws<CsvValidationException>(
+            () => _validator.Validate(rows, CurrentUtc));
+
+        Assert.Equal(2, exception.RowNumber);
+        Assert.Contains("ExecutionTime", exception.Message);
+    }
+
     [Theory]
     [InlineData("", "1", "1", "Date")]
     [InlineData("2026-08-10T12:00:00Z", "", "1", "ExecutionTime")]

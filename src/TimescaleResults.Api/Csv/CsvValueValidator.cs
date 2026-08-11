@@ -128,9 +128,13 @@ public sealed class CsvValueValidator
         string fieldName,
         int rowNumber)
     {
+        const NumberStyles numberStyles =
+            NumberStyles.AllowLeadingSign |
+            NumberStyles.AllowDecimalPoint;
+
         if (!decimal.TryParse(
                 value,
-                NumberStyles.Number,
+                numberStyles,
                 CultureInfo.InvariantCulture,
                 out var parsedValue))
         {
