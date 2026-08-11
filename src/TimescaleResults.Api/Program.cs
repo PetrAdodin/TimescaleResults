@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using TimescaleResults.Api.Csv;
 using TimescaleResults.Api.Data;
+using TimescaleResults.Api.ErrorHandling;
+using TimescaleResults.Api.Services;
+using TimescaleResults.Api.Statistics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +13,21 @@ var connectionString = builder.Configuration.GetConnectionString("Postgres")
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddScoped<CsvFileParser>();
+builder.Services.AddScoped<CsvValueValidator>();
+builder.Services.AddScoped<StatisticsCalculator>();
+builder.Services.AddScoped<CsvUploadService>();
+
+builder.Services.AddExceptionHandler<CsvValidationExceptionHandler>();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
