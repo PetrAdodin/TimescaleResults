@@ -1,6 +1,21 @@
 @TimescaleResults.Api_HostAddress = http://localhost:5031
 
-GET {{TimescaleResults.Api_HostAddress}}/weatherforecast/
+### Get all results
+
+GET {{TimescaleResults.Api_HostAddress}}/api/results
 Accept: application/json
 
-###
+### Filter results by file name
+
+GET {{TimescaleResults.Api_HostAddress}}/api/results?fileName=measurements.csv
+Accept: application/json
+
+### Filter results by ranges
+
+GET {{TimescaleResults.Api_HostAddress}}/api/results?averageValueFrom=100&averageValueTo=500&averageExecutionTimeTo=20
+Accept: application/json
+
+### Get latest values for a file
+
+GET {{TimescaleResults.Api_HostAddress}}/api/files/measurements.csv/values
+Accept: application/json
