@@ -22,8 +22,10 @@ builder.Services.AddScoped<CsvFileParser>();
 builder.Services.AddScoped<CsvValueValidator>();
 builder.Services.AddScoped<StatisticsCalculator>();
 builder.Services.AddScoped<CsvUploadService>();
+builder.Services.AddScoped<ResultQueryService>();
 
 builder.Services.AddExceptionHandler<CsvValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<ResultFilterValidationExceptionHandler>();
 
 var app = builder.Build();
 
