@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Buffers.Binary;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 using TimescaleResults.Api.Csv;
 using TimescaleResults.Api.Data;
 using TimescaleResults.Api.Data.Entities;
@@ -35,9 +38,15 @@ public sealed class CsvUploadService(
             validatedRows,
             statistics);
 
+        var fileLockKey = CreateFileLockKey(fileName);
+
         await using var transaction =
             await dbContext.Database.BeginTransactionAsync(
                 cancellationToken);
+
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT pg_advisory_xact_lock({fileLockKey});",
+            cancellationToken);
 
         await dbContext.Results
             .Where(existingResult => existingResult.FileName == fileName)
@@ -48,6 +57,14 @@ public sealed class CsvUploadService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
+    }
+
+    private static long CreateFileLockKey(string fileName)
+    {
+        var bytes = Encoding.UTF8.GetBytes(fileName);
+        var hash = SHA256.HashData(bytes);
+
+        return BinaryPrimitives.ReadInt64BigEndian(hash);
     }
 
     private static ResultEntity CreateResultEntity(
