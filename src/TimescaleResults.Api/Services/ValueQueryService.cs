@@ -17,6 +17,7 @@ public sealed class ValueQueryService(
             .AsNoTracking()
             .Where(value => value.Result.FileName == fileName)
             .OrderByDescending(value => value.Date)
+            .ThenByDescending(value => value.Id)
             .Take(10)
             .Select(value => new ValueDto(
                 value.Date,
