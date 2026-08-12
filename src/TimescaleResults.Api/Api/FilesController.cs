@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TimescaleResults.Api.Services;
+using TimescaleResults.Api.Values;
 
-namespace TimescaleResults.Api.Controllers;
+namespace TimescaleResults.Api.Api;
 
 [ApiController]
 [Route("api/files")]
 public sealed class FilesController(
-    CsvUploadService csvUploadService) : ControllerBase
+    CsvUploadService csvUploadService,
+    ValueQueryService valueQueryService) : ControllerBase
 {
     [HttpPost]
     [Consumes("multipart/form-data")]
@@ -21,10 +23,7 @@ public sealed class FilesController(
 
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            ModelState.AddModelError(
-                nameof(file),
-                "File name is required.");
-
+            ModelState.AddModelError(nameof(file), "File name is required.");
             return ValidationProblem(ModelState);
         }
 
@@ -36,5 +35,18 @@ public sealed class FilesController(
             cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpGet("{fileName}/values")]
+    [ProducesResponseType<IReadOnlyList<ValueDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<ValueDto>>> GetLatestValues(
+        string fileName,
+        CancellationToken cancellationToken)
+    {
+        var values = await valueQueryService.GetLatestAsync(
+            fileName,
+            cancellationToken);
+
+        return Ok(values);
     }
 }
